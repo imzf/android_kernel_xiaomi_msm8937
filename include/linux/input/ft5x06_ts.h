@@ -74,4 +74,8 @@ struct ft5x06_ts_platform_data {
 	int (*power_on)(bool);
 };
 
+#if (defined(CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE) || defined(CONFIG_TOUCHSCREEN_SWEEP2WAKE))
+extern bool gesture_incall;
+#endif
+
 #endif
