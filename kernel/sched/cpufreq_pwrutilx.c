@@ -3,12 +3,6 @@
  *
  * Copyright (C) 2016, Intel Corporation
  * Author: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
-<<<<<<< HEAD
-=======
- * 
- * Copyright (C) 2017, Team Helix
- * Author: ZeroInfinity @ XDA-Developers.com <infinitezero345@gmail.com>
->>>>>>> 1b8e8b5... sched: add various eas governors
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -21,10 +15,6 @@
 #include <linux/kthread.h>
 #include <linux/slab.h>
 #include <trace/events/power.h>
-<<<<<<< HEAD
-=======
-#include <linux/display_state.h>
->>>>>>> 1b8e8b5... sched: add various eas governors
 
 #include "sched.h"
 #include "tune.h"
@@ -37,20 +27,13 @@ unsigned long boosted_cpu_util(int cpu);
 #define cpufreq_enable_fast_switch(x)
 #define cpufreq_disable_fast_switch(x)
 #define LATENCY_MULTIPLIER			(1000)
-<<<<<<< HEAD
 #define PWRGOV_KTHREAD_PRIORITY	25
-=======
-#define PWRGOV_KTHREAD_PRIORITY	50
->>>>>>> 1b8e8b5... sched: add various eas governors
 
 struct pwrgov_tunables {
 	struct gov_attr_set attr_set;
 	unsigned int up_rate_limit_us;
 	unsigned int down_rate_limit_us;
-<<<<<<< HEAD
 	bool iowait_boost_enable;
-=======
->>>>>>> 1b8e8b5... sched: add various eas governors
 };
 
 struct pwrgov_policy {
@@ -65,10 +48,7 @@ struct pwrgov_policy {
 	s64 up_rate_delay_ns;
 	s64 down_rate_delay_ns;
 	unsigned int next_freq;
-<<<<<<< HEAD
 	unsigned int cached_raw_freq;
-=======
->>>>>>> 1b8e8b5... sched: add various eas governors
 
 	/* The next fields are only needed if fast switch cannot be used. */
 	struct irq_work irq_work;
@@ -85,10 +65,6 @@ struct pwrgov_cpu {
 	struct update_util_data update_util;
 	struct pwrgov_policy *sg_policy;
 
-<<<<<<< HEAD
-=======
-	unsigned int cached_raw_freq;
->>>>>>> 1b8e8b5... sched: add various eas governors
 	unsigned long iowait_boost;
 	unsigned long iowait_boost_max;
 	u64 last_update;
@@ -97,14 +73,11 @@ struct pwrgov_cpu {
 	unsigned long util;
 	unsigned long max;
 	unsigned int flags;
-<<<<<<< HEAD
 
 	/* The field below is for single-CPU policies only. */
 #ifdef CONFIG_NO_HZ_COMMON
 	unsigned long saved_idle_calls;
 #endif
-=======
->>>>>>> 1b8e8b5... sched: add various eas governors
 };
 
 static DEFINE_PER_CPU(struct pwrgov_cpu, pwrgov_cpu);
@@ -158,7 +131,6 @@ static void pwrgov_update_commit(struct pwrgov_policy *sg_policy, u64 time,
 {
 	struct cpufreq_policy *policy = sg_policy->policy;
 
-<<<<<<< HEAD
 	if (pwrgov_up_down_rate_limit(sg_policy, time, next_freq)) {
 		/* Reset cached freq as next_freq isn't changed */
 		sg_policy->cached_raw_freq = 0;
@@ -172,31 +144,13 @@ static void pwrgov_update_commit(struct pwrgov_policy *sg_policy, u64 time,
 	sg_policy->last_freq_update_time = time;
 
 	if (policy->fast_switch_enabled) {
-=======
-	if (pwrgov_up_down_rate_limit(sg_policy, time, next_freq))
-		return;
-
-	sg_policy->last_freq_update_time = time;
-
-	if (policy->fast_switch_enabled) {
-		if (sg_policy->next_freq == next_freq) {
-			trace_cpu_frequency(policy->cur, smp_processor_id());
-			return;
-		}
-		sg_policy->next_freq = next_freq;
->>>>>>> 1b8e8b5... sched: add various eas governors
 		next_freq = cpufreq_driver_fast_switch(policy, next_freq);
 		if (next_freq == CPUFREQ_ENTRY_INVALID)
 			return;
 
 		policy->cur = next_freq;
 		trace_cpu_frequency(next_freq, smp_processor_id());
-<<<<<<< HEAD
 	} else {
-=======
-	} else if (sg_policy->next_freq != next_freq) {
-		sg_policy->next_freq = next_freq;
->>>>>>> 1b8e8b5... sched: add various eas governors
 		sg_policy->work_in_progress = true;
 		irq_work_queue(&sg_policy->irq_work);
 	}
@@ -204,16 +158,9 @@ static void pwrgov_update_commit(struct pwrgov_policy *sg_policy, u64 time,
 
 /**
  * get_next_freq - Compute a new frequency for a given cpufreq policy.
-<<<<<<< HEAD
  * @sg_policy: pwrutilx policy object to compute the new frequency for.
  * @util: Current CPU utilization.
  * @max: CPU capacity.
-=======
- * @sg_cpu: pwrutilx cpu object to compute the new frequency for.
- * @util: Current CPU utilization.
- * @max: CPU capacity.
- * @display_on: API to check if display is currently on.
->>>>>>> 1b8e8b5... sched: add various eas governors
  *
  * If the utilization is frequency-invariant, choose the new frequency to be
  * proportional to it, that is
@@ -225,16 +172,11 @@ static void pwrgov_update_commit(struct pwrgov_policy *sg_policy, u64 time,
  *
  * next_freq = C * curr_freq * util_raw / max
  *
-<<<<<<< HEAD
  * Take C = 1.25 for the frequency tipping point at (util / max) = 0.8.
-=======
- * Take C = 1.25 for the frequency tipping point at (util / max) = 0.80.
->>>>>>> 1b8e8b5... sched: add various eas governors
  *
  * The lowest driver-supported frequency which is equal or greater than the raw
  * next_freq (as calculated above) is returned, subject to policy min/max and
  * cpufreq driver limitations.
-<<<<<<< HEAD
  */
 static unsigned int get_next_freq(struct pwrgov_policy *sg_policy,
 				  unsigned long util, unsigned long max)
@@ -248,56 +190,6 @@ static unsigned int get_next_freq(struct pwrgov_policy *sg_policy,
 	if (freq == sg_policy->cached_raw_freq && sg_policy->next_freq != UINT_MAX)
 		return sg_policy->next_freq;
 	sg_policy->cached_raw_freq = freq;
-=======
- * 
- * For the big cluster, choose the new frequency to be exactly right according
- * to current util.
- * 
- * If the utilization is frequency-invariant, choose the new frequency to be
- * proportional to it, that is
- *
- * next_freq = max_freq * util / max
- *
- * Otherwise, approximate the would-be frequency-invariant utilization by
- * util_raw * (curr_freq / max_freq) which leads to
- *
- * next_freq = curr_freq * util_raw / max
- * 
- * If the device's screen turns off, apply these rules:
- * 
- * Little cluster will use next_freq = freq * util / max
- * 
- * Big cluster will be capped at minimum frequency
- * 
- * Capping the frequency to minimum rather than turning off cores
- * is better for latency when tasks are being migrated.
- */
-static unsigned int get_next_freq(struct pwrgov_cpu *sg_cpu, unsigned long util,
-				  unsigned long max)
-{
-	struct pwrgov_policy *sg_policy = sg_cpu->sg_policy;
-	struct cpufreq_policy *policy = sg_policy->policy;
-	unsigned int freq = arch_scale_freq_invariant() ?
-				policy->max : policy->cur;
-	const bool display_on = is_display_on();
-	
-	if(policy->cpu < 2) {
-		if(display_on)
-			freq = (freq + (freq >> 2)) * util / max;
-		else
-			freq = freq * util / max;
-	} else {
-		if(display_on)
-			freq = freq * util / max;
-		else
-			return policy->min;
-	}
-
-	if (freq == sg_cpu->cached_raw_freq && sg_policy->next_freq != UINT_MAX)
-		return sg_policy->next_freq;
-	sg_cpu->cached_raw_freq = freq;
-	
->>>>>>> 1b8e8b5... sched: add various eas governors
 	return cpufreq_driver_resolve_freq(policy, freq);
 }
 
@@ -328,28 +220,21 @@ static void pwrgov_get_util(unsigned long *util, unsigned long *max, u64 time)
 
 	*util = boosted_cpu_util(cpu);
 	if (likely(use_pelt()))
-<<<<<<< HEAD
 		*util = *util + rt;
 
 	*util = min(*util, max_cap);
 
-=======
-		*util = min((*util + rt), max_cap);
->>>>>>> 1b8e8b5... sched: add various eas governors
 	*max = max_cap;
 }
 
 static void pwrgov_set_iowait_boost(struct pwrgov_cpu *sg_cpu, u64 time,
 				   unsigned int flags)
 {
-<<<<<<< HEAD
 	struct pwrgov_policy *sg_policy = sg_cpu->sg_policy;
 
 	if (!sg_policy->tunables->iowait_boost_enable)
 		return;
 
-=======
->>>>>>> 1b8e8b5... sched: add various eas governors
 	if (flags & SCHED_CPUFREQ_IOWAIT) {
 		sg_cpu->iowait_boost = sg_cpu->iowait_boost_max;
 	} else if (sg_cpu->iowait_boost) {
@@ -377,7 +262,6 @@ static void pwrgov_iowait_boost(struct pwrgov_cpu *sg_cpu, unsigned long *util,
 	sg_cpu->iowait_boost >>= 1;
 }
 
-<<<<<<< HEAD
 #ifdef CONFIG_NO_HZ_COMMON
 static bool pwrgov_cpu_is_busy(struct pwrgov_cpu *sg_cpu)
 {
@@ -390,55 +274,6 @@ static bool pwrgov_cpu_is_busy(struct pwrgov_cpu *sg_cpu)
 #else
 static inline bool pwrgov_cpu_is_busy(struct pwrgov_cpu *sg_cpu) { return false; }
 #endif /* CONFIG_NO_HZ_COMMON */
-=======
-#ifdef CONFIG_CAPACITY_CLAMPING
-
-static inline
-void cap_clamp_cpu_range(unsigned int cpu, unsigned int *cap_min,
-			 unsigned int *cap_max)
-{
-	struct cap_clamp_cpu *cgc;
-
-	*cap_min = 0;
-	cgc = &cpu_rq(cpu)->cap_clamp_cpu[CAP_CLAMP_MIN];
-	if (cgc->node)
-		*cap_min = cgc->value;
-
-	*cap_max = SCHED_CAPACITY_SCALE;
-	cgc = &cpu_rq(cpu)->cap_clamp_cpu[CAP_CLAMP_MAX];
-	if (cgc->node)
-		*cap_max = cgc->value;
-}
-
-static inline
-unsigned int cap_clamp_cpu_util(unsigned int cpu, unsigned int util)
-{
-	unsigned int cap_max, cap_min;
-
-	cap_clamp_cpu_range(cpu, &cap_min, &cap_max);
-	return clamp(util, cap_min, cap_max);
-}
-
-static inline
-void cap_clamp_compose(unsigned int *cap_min, unsigned int *cap_max,
-		       unsigned int j_cap_min, unsigned int j_cap_max)
-{
-	*cap_min = max(*cap_min, j_cap_min);
-	*cap_max = max(*cap_max, j_cap_max);
-}
-
-#define cap_clamp_util_range(util, cap_min, cap_max) \
-	clamp_t(typeof(util), util, cap_min, cap_max)
-
-#else
-
-#define cap_clamp_cpu_range(cpu, cap_min, cap_max) { }
-#define cap_clamp_cpu_util(cpu, util) util
-#define cap_clamp_compose(cap_min, cap_max, j_cap_min, j_cap_max) { }
-#define cap_clamp_util_range(util, cap_min, cap_max) util
-
-#endif /* CONFIG_CAPACITY_CLAMPING */
->>>>>>> 1b8e8b5... sched: add various eas governors
 
 static void pwrgov_update_single(struct update_util_data *hook, u64 time,
 				unsigned int flags)
@@ -448,10 +283,7 @@ static void pwrgov_update_single(struct update_util_data *hook, u64 time,
 	struct cpufreq_policy *policy = sg_policy->policy;
 	unsigned long util, max;
 	unsigned int next_f;
-<<<<<<< HEAD
 	bool busy;
-=======
->>>>>>> 1b8e8b5... sched: add various eas governors
 
 	pwrgov_set_iowait_boost(sg_cpu, time, flags);
 	sg_cpu->last_update = time;
@@ -459,7 +291,6 @@ static void pwrgov_update_single(struct update_util_data *hook, u64 time,
 	if (!pwrgov_should_update_freq(sg_policy, time))
 		return;
 
-<<<<<<< HEAD
 	busy = pwrgov_cpu_is_busy(sg_cpu);
 
 	if (flags & SCHED_CPUFREQ_DL) {
@@ -477,33 +308,15 @@ static void pwrgov_update_single(struct update_util_data *hook, u64 time,
 			/* Reset cached freq as next_freq has changed */
 			sg_policy->cached_raw_freq = 0;
 		}
-=======
-	if (flags & SCHED_CPUFREQ_DL) {
-		util = cap_clamp_cpu_util(smp_processor_id(),
-					  SCHED_CAPACITY_SCALE);
-		next_f = get_next_freq(sg_cpu, util, policy->cpuinfo.max_freq);
-	} else {
-		pwrgov_get_util(&util, &max, time);
-		pwrgov_iowait_boost(sg_cpu, &util, &max);
-		util = cap_clamp_cpu_util(smp_processor_id(), util);
-		next_f = get_next_freq(sg_cpu, util, max);
->>>>>>> 1b8e8b5... sched: add various eas governors
 	}
 	pwrgov_update_commit(sg_policy, time, next_f);
 }
 
-<<<<<<< HEAD
 static unsigned int pwrgov_next_freq_shared(struct pwrgov_cpu *sg_cpu)
-=======
-static unsigned int pwrgov_next_freq_shared(struct pwrgov_cpu *sg_cpu,
-					   unsigned long util, unsigned long max,
-					   unsigned int flags)
->>>>>>> 1b8e8b5... sched: add various eas governors
 {
 	struct pwrgov_policy *sg_policy = sg_cpu->sg_policy;
 	struct cpufreq_policy *policy = sg_policy->policy;
 	u64 last_freq_update_time = sg_policy->last_freq_update_time;
-<<<<<<< HEAD
 	unsigned long util = 0, max = 1;
 	unsigned int j;
 
@@ -512,27 +325,6 @@ static unsigned int pwrgov_next_freq_shared(struct pwrgov_cpu *sg_cpu,
 		unsigned long j_util, j_max;
 		s64 delta_ns;
 
-=======
-	unsigned int cap_max = SCHED_CAPACITY_SCALE;
-	unsigned int cap_min = 0;
-	unsigned int j;
-
-	pwrgov_iowait_boost(sg_cpu, &util, &max);
-
-	/* Initialize clamping range based on caller CPU constraints */
-	cap_clamp_cpu_range(smp_processor_id(), &cap_min, &cap_max);
-
-	for_each_cpu(j, policy->cpus) {
-		struct pwrgov_cpu *j_sg_cpu;
-		unsigned long j_util, j_max;
-		unsigned int j_cap_max, j_cap_min;
-		s64 delta_ns;
-
-		if (j == smp_processor_id())
-			continue;
-
-		j_sg_cpu = &per_cpu(pwrgov_cpu, j);
->>>>>>> 1b8e8b5... sched: add various eas governors
 		/*
 		 * If the CPU utilization was last updated before the previous
 		 * frequency update and the time elapsed between the last update
@@ -546,15 +338,9 @@ static unsigned int pwrgov_next_freq_shared(struct pwrgov_cpu *sg_cpu,
 			continue;
 		}
 		if (j_sg_cpu->flags & SCHED_CPUFREQ_DL)
-<<<<<<< HEAD
 			return policy->cpuinfo.max_freq;
 
 		j_util = j_sg_cpu->util;
-=======
-			j_util = cap_clamp_cpu_util(j, SCHED_CAPACITY_SCALE);
-		else
-			j_util = j_sg_cpu->util;
->>>>>>> 1b8e8b5... sched: add various eas governors
 		j_max = j_sg_cpu->max;
 		if (j_util * max > j_max * util) {
 			util = j_util;
@@ -562,28 +348,9 @@ static unsigned int pwrgov_next_freq_shared(struct pwrgov_cpu *sg_cpu,
 		}
 
 		pwrgov_iowait_boost(j_sg_cpu, &util, &max);
-<<<<<<< HEAD
 	}
 
 	return get_next_freq(sg_policy, util, max);
-=======
-
-		/*
-		 * Update clamping range based on this CPU constraints, but
-		 * only if this CPU is not currently idle. Idle CPUs do not
-		 * enforce constraints in a shared frequency domain.
-		 */
-		if (!idle_cpu(j)) {
-			cap_clamp_cpu_range(j, &j_cap_min, &j_cap_max);
-			cap_clamp_compose(&cap_min, &cap_max,
-					  j_cap_min, j_cap_max);
-		}
-	}
-
-	/* Clamp utilization on aggregated CPUs ranges */
-	util = cap_clamp_util_range(util, cap_min, cap_max);
-	return get_next_freq(sg_cpu, util, max);
->>>>>>> 1b8e8b5... sched: add various eas governors
 }
 
 static void pwrgov_update_shared(struct update_util_data *hook, u64 time,
@@ -598,15 +365,6 @@ static void pwrgov_update_shared(struct update_util_data *hook, u64 time,
 
 	raw_spin_lock(&sg_policy->update_lock);
 
-<<<<<<< HEAD
-=======
-	/* CPU is entering IDLE, reset flags without triggering an update */
-	if (flags & SCHED_CPUFREQ_IDLE) {
-		sg_cpu->flags = 0;
-		goto done;
-	}
-
->>>>>>> 1b8e8b5... sched: add various eas governors
 	sg_cpu->util = util;
 	sg_cpu->max = max;
 	sg_cpu->flags = flags;
@@ -615,7 +373,6 @@ static void pwrgov_update_shared(struct update_util_data *hook, u64 time,
 	sg_cpu->last_update = time;
 
 	if (pwrgov_should_update_freq(sg_policy, time)) {
-<<<<<<< HEAD
 		if (flags & SCHED_CPUFREQ_DL)
 			next_f = sg_policy->policy->cpuinfo.max_freq;
 		else
@@ -623,13 +380,6 @@ static void pwrgov_update_shared(struct update_util_data *hook, u64 time,
 		pwrgov_update_commit(sg_policy, time, next_f);
 	}
 
-=======
-		next_f = pwrgov_next_freq_shared(sg_cpu, util, max, flags);
-		pwrgov_update_commit(sg_policy, time, next_f);
-	}
-
-done:
->>>>>>> 1b8e8b5... sched: add various eas governors
 	raw_spin_unlock(&sg_policy->update_lock);
 }
 
@@ -652,7 +402,6 @@ static void pwrgov_irq_work(struct irq_work *irq_work)
 	sg_policy = container_of(irq_work, struct pwrgov_policy, irq_work);
 
 	/*
-<<<<<<< HEAD
 	 * For RT and deadline tasks, the pwrutilx governor shoots the
 	 * frequency to maximum. Special care must be taken to ensure that this
 	 * kthread doesn't result in the same behavior.
@@ -662,17 +411,6 @@ static void pwrgov_irq_work(struct irq_work *irq_work)
 	 * the pwrutilx governor rejects all other frequency scaling requests.
 	 *
 	 * There is a very rare case though, where the RT thread yields right
-=======
-	 * For Real Time and Deadline tasks, pwrutilx governor shoots the
-	 * frequency to maximum. And special care must be taken to ensure that
-	 * this kthread doesn't result in that.
-	 *
-	 * This is (mostly) guaranteed by the work_in_progress flag. The flag is
-	 * updated only at the end of the pwrgov_work() and before that pwrutilx
-	 * rejects all other frequency scaling requests.
-	 *
-	 * Though there is a very rare case where the RT thread yields right
->>>>>>> 1b8e8b5... sched: add various eas governors
 	 * after the work_in_progress flag is cleared. The effects of that are
 	 * neglected for now.
 	 */
@@ -753,7 +491,6 @@ static ssize_t down_rate_limit_us_store(struct gov_attr_set *attr_set,
 	return count;
 }
 
-<<<<<<< HEAD
 static ssize_t iowait_boost_enable_show(struct gov_attr_set *attr_set,
 					char *buf)
 {
@@ -779,18 +516,11 @@ static ssize_t iowait_boost_enable_store(struct gov_attr_set *attr_set,
 static struct governor_attr up_rate_limit_us = __ATTR_RW(up_rate_limit_us);
 static struct governor_attr down_rate_limit_us = __ATTR_RW(down_rate_limit_us);
 static struct governor_attr iowait_boost_enable = __ATTR_RW(iowait_boost_enable);
-=======
-static struct governor_attr up_rate_limit_us = __ATTR_RW(up_rate_limit_us);
-static struct governor_attr down_rate_limit_us = __ATTR_RW(down_rate_limit_us);
->>>>>>> 1b8e8b5... sched: add various eas governors
 
 static struct attribute *pwrgov_attributes[] = {
 	&up_rate_limit_us.attr,
 	&down_rate_limit_us.attr,
-<<<<<<< HEAD
 	&iowait_boost_enable.attr,
-=======
->>>>>>> 1b8e8b5... sched: add various eas governors
 	NULL
 };
 
@@ -814,11 +544,6 @@ static struct pwrgov_policy *pwrgov_policy_alloc(struct cpufreq_policy *policy)
 		return NULL;
 
 	sg_policy->policy = policy;
-<<<<<<< HEAD
-=======
-	init_irq_work(&sg_policy->irq_work, pwrgov_irq_work);
-	mutex_init(&sg_policy->work_lock);
->>>>>>> 1b8e8b5... sched: add various eas governors
 	raw_spin_lock_init(&sg_policy->update_lock);
 	return sg_policy;
 }
@@ -859,11 +584,8 @@ static int pwrgov_kthread_create(struct pwrgov_policy *sg_policy)
 
 	sg_policy->thread = thread;
 	kthread_bind_mask(thread, policy->related_cpus);
-<<<<<<< HEAD
 	init_irq_work(&sg_policy->irq_work, pwrgov_irq_work);
 	mutex_init(&sg_policy->work_lock);
-=======
->>>>>>> 1b8e8b5... sched: add various eas governors
 	wake_up_process(thread);
 
 	return 0;
@@ -877,10 +599,7 @@ static void pwrgov_kthread_stop(struct pwrgov_policy *sg_policy)
 
 	flush_kthread_worker(&sg_policy->worker);
 	kthread_stop(sg_policy->thread);
-<<<<<<< HEAD
 	mutex_destroy(&sg_policy->work_lock);
-=======
->>>>>>> 1b8e8b5... sched: add various eas governors
 }
 
 static struct pwrgov_tunables *pwrgov_tunables_alloc(struct pwrgov_policy *sg_policy)
@@ -915,10 +634,7 @@ static void store_tunables_data(struct pwrgov_tunables *tunables,
 		return;
 	ptunables->up_rate_limit_us = tunables->up_rate_limit_us;
 	ptunables->down_rate_limit_us = tunables->down_rate_limit_us;
-<<<<<<< HEAD
 	ptunables->iowait_boost_enable = tunables->iowait_boost_enable; 
-=======
->>>>>>> 1b8e8b5... sched: add various eas governors
 
 	pr_debug("tunables data saved for cpu[%u]\n", cpu);
 }
@@ -937,10 +653,7 @@ static void get_tunables_data(struct pwrgov_tunables *tunables,
 	if (ptunables->up_rate_limit_us > 0) {
 		tunables->up_rate_limit_us = ptunables->up_rate_limit_us;
 		tunables->down_rate_limit_us = ptunables->down_rate_limit_us;
-<<<<<<< HEAD
 		tunables->iowait_boost_enable = ptunables->iowait_boost_enable;
-=======
->>>>>>> 1b8e8b5... sched: add various eas governors
 		pr_debug("tunables data restored for cpu[%u]\n", cpu);
 		goto out;
 	}
@@ -948,10 +661,6 @@ static void get_tunables_data(struct pwrgov_tunables *tunables,
 initialize:
 	tunables->up_rate_limit_us = LATENCY_MULTIPLIER;
 	tunables->down_rate_limit_us = LATENCY_MULTIPLIER;
-<<<<<<< HEAD
-=======
-		
->>>>>>> 1b8e8b5... sched: add various eas governors
 	lat = policy->cpuinfo.transition_latency / NSEC_PER_USEC;
 	if (lat) {
 		tunables->up_rate_limit_us *= lat;
@@ -973,7 +682,6 @@ static int pwrgov_init(struct cpufreq_policy *policy)
 	if (policy->governor_data)
 		return -EBUSY;
 
-<<<<<<< HEAD
 	cpufreq_enable_fast_switch(policy);
 
 	sg_policy = pwrgov_policy_alloc(policy);
@@ -981,11 +689,6 @@ static int pwrgov_init(struct cpufreq_policy *policy)
 		ret = -ENOMEM;
 		goto disable_fast_switch;
 	}
-=======
-	sg_policy = pwrgov_policy_alloc(policy);
-	if (!sg_policy)
-		return -ENOMEM;
->>>>>>> 1b8e8b5... sched: add various eas governors
 
 	ret = pwrgov_kthread_create(sg_policy);
 	if (ret)
@@ -1022,21 +725,13 @@ static int pwrgov_init(struct cpufreq_policy *policy)
 	if (ret)
 		goto fail;
 
-<<<<<<< HEAD
 out:
-=======
- out:
->>>>>>> 1b8e8b5... sched: add various eas governors
 	mutex_unlock(&global_tunables_lock);
 
 	cpufreq_enable_fast_switch(policy);
 	return 0;
 
-<<<<<<< HEAD
 fail:
-=======
- fail:
->>>>>>> 1b8e8b5... sched: add various eas governors
 	policy->governor_data = NULL;
 	pwrgov_tunables_free(tunables);
 
@@ -1047,12 +742,9 @@ free_sg_policy:
 	mutex_unlock(&global_tunables_lock);
 
 	pwrgov_policy_free(sg_policy);
-<<<<<<< HEAD
 
 disable_fast_switch:
 	cpufreq_disable_fast_switch(policy);
-=======
->>>>>>> 1b8e8b5... sched: add various eas governors
 	pr_err("initialization failed (error %d)\n", ret);
 	return ret;
 }
@@ -1063,11 +755,6 @@ static int pwrgov_exit(struct cpufreq_policy *policy)
 	struct pwrgov_tunables *tunables = sg_policy->tunables;
 	unsigned int count;
 
-<<<<<<< HEAD
-=======
-	cpufreq_disable_fast_switch(policy);
-
->>>>>>> 1b8e8b5... sched: add various eas governors
 	mutex_lock(&global_tunables_lock);
 	
 	store_tunables_data(sg_policy->tunables, policy);
@@ -1081,10 +768,7 @@ static int pwrgov_exit(struct cpufreq_policy *policy)
 	pwrgov_kthread_stop(sg_policy);
 	pwrgov_policy_free(sg_policy);
 
-<<<<<<< HEAD
 	cpufreq_disable_fast_switch(policy);
-=======
->>>>>>> 1b8e8b5... sched: add various eas governors
 	return 0;
 }
 
@@ -1102,15 +786,11 @@ static int pwrgov_start(struct cpufreq_policy *policy)
 	sg_policy->next_freq = UINT_MAX;
 	sg_policy->work_in_progress = false;
 	sg_policy->need_freq_update = false;
-<<<<<<< HEAD
 	sg_policy->cached_raw_freq = 0;
-=======
->>>>>>> 1b8e8b5... sched: add various eas governors
 
 	for_each_cpu(cpu, policy->cpus) {
 		struct pwrgov_cpu *sg_cpu = &per_cpu(pwrgov_cpu, cpu);
 
-<<<<<<< HEAD
 		memset(sg_cpu, 0, sizeof(*sg_cpu));
 		sg_cpu->sg_policy = sg_policy;
 		sg_cpu->flags = SCHED_CPUFREQ_DL;
@@ -1119,23 +799,6 @@ static int pwrgov_start(struct cpufreq_policy *policy)
 					     policy_is_shared(policy) ?
 							pwrgov_update_shared :
 							pwrgov_update_single);
-=======
-		sg_cpu->sg_policy = sg_policy;
-		if (policy_is_shared(policy)) {
-			sg_cpu->util = 0;
-			sg_cpu->max = 0;
-			sg_cpu->flags = SCHED_CPUFREQ_DL;
-			sg_cpu->last_update = 0;
-			sg_cpu->cached_raw_freq = 0;
-			sg_cpu->iowait_boost = 0;
-			sg_cpu->iowait_boost_max = policy->cpuinfo.max_freq;
-			cpufreq_add_update_util_hook(cpu, &sg_cpu->update_util,
-						     pwrgov_update_shared);
-		} else {
-			cpufreq_add_update_util_hook(cpu, &sg_cpu->update_util,
-						     pwrgov_update_single);
-		}
->>>>>>> 1b8e8b5... sched: add various eas governors
 	}
 	return 0;
 }
@@ -1150,15 +813,10 @@ static int pwrgov_stop(struct cpufreq_policy *policy)
 
 	synchronize_sched();
 
-<<<<<<< HEAD
 	if (!policy->fast_switch_enabled) {
 		irq_work_sync(&sg_policy->irq_work);
 		kthread_cancel_work_sync(&sg_policy->work);
 	}
-=======
-	irq_work_sync(&sg_policy->irq_work);
-	kthread_cancel_work_sync(&sg_policy->work);
->>>>>>> 1b8e8b5... sched: add various eas governors
 
 	return 0;
 }
