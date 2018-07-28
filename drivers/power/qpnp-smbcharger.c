@@ -6627,7 +6627,7 @@ static irqreturn_t batt_cold_handler(int irq, void *_chip)
 	return IRQ_HANDLED;
 }
 
-#define BATT_WARM_CURRENT		1500
+#define BATT_WARM_CURRENT		1800
 #define BATT_WARM_VOLTAGE		15
 
 static irqreturn_t batt_warm_handler(int irq, void *_chip)
@@ -6652,7 +6652,7 @@ static irqreturn_t batt_warm_handler(int irq, void *_chip)
 	return IRQ_HANDLED;
 }
 
-#define BATT_COOL_CURRENT		1500
+#define BATT_COOL_CURRENT		1800
 #define BATT_COOL_VOLTAGE		0
 
 static irqreturn_t batt_cool_handler(int irq, void *_chip)
