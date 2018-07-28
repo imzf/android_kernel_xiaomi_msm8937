@@ -6627,7 +6627,7 @@ static irqreturn_t batt_cold_handler(int irq, void *_chip)
 	return IRQ_HANDLED;
 }
 
-#define BATT_WARM_CURRENT		900
+#define BATT_WARM_CURRENT		1500
 #define BATT_WARM_VOLTAGE		15
 
 static irqreturn_t batt_warm_handler(int irq, void *_chip)
@@ -6652,7 +6652,7 @@ static irqreturn_t batt_warm_handler(int irq, void *_chip)
 	return IRQ_HANDLED;
 }
 
-#define BATT_COOL_CURRENT		900
+#define BATT_COOL_CURRENT		1500
 #define BATT_COOL_VOLTAGE		0
 
 static irqreturn_t batt_cool_handler(int irq, void *_chip)
@@ -7902,7 +7902,7 @@ err:
 
 #define DEFAULT_VLED_MAX_UV		3500000
 #define DEFAULT_FCC_MA			2500
-#define INDIA_DEFAULT_FCC_MA	2000
+#define INDIA_DEFAULT_FCC_MA	2500
 static int smb_parse_dt(struct smbchg_chip *chip)
 {
 	int rc = 0, ocp_thresh = -EINVAL;
