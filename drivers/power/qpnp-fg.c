@@ -4257,7 +4257,7 @@ static void check_gain_compensation(struct fg_chip *chip)
 	}
 }
 
-#define WARNTEMP 45
+#define WARNTEMP 30
 #define COOLTEMP 10
 
 static void fg_hysteresis_config(struct fg_chip *chip)
