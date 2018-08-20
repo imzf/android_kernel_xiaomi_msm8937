@@ -7213,7 +7213,7 @@ static int fg_of_init(struct fg_chip *chip)
 	OF_READ_PROPERTY(chip->learning_data.max_decrement,
 			"cl-max-decrement-deciperc", rc, 100);
 	OF_READ_PROPERTY(chip->learning_data.max_temp,
-			"cl-max-temp-decidegc", rc, 450);
+			"cl-max-temp-decidegc", rc, 485);
 	OF_READ_PROPERTY(chip->learning_data.min_temp,
 			"cl-min-temp-decidegc", rc, 150);
 	OF_READ_PROPERTY(chip->learning_data.max_start_soc,

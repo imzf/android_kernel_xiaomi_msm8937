@@ -1103,7 +1103,7 @@ static int get_prop_batt_temp(struct smbchg_chip *chip)
 	if (temp < -100) {
 		temp = temp - 55;
 		return temp;
-	} else if (temp > 450) {
+	} else if (temp > 485) {
 		temp = temp - 10;
 		return temp;
 	} else
@@ -6627,7 +6627,7 @@ static irqreturn_t batt_cold_handler(int irq, void *_chip)
 	return IRQ_HANDLED;
 }
 
-#define BATT_WARM_CURRENT		900
+#define BATT_WARM_CURRENT		1000
 #define BATT_WARM_VOLTAGE		15
 
 static irqreturn_t batt_warm_handler(int irq, void *_chip)
@@ -6652,7 +6652,7 @@ static irqreturn_t batt_warm_handler(int irq, void *_chip)
 	return IRQ_HANDLED;
 }
 
-#define BATT_COOL_CURRENT		900
+#define BATT_COOL_CURRENT		1000
 #define BATT_COOL_VOLTAGE		0
 
 static irqreturn_t batt_cool_handler(int irq, void *_chip)
